@@ -1,6 +1,6 @@
 # IOC 容器（Bean对象的实例化流程）创建大致流程以及解析
 
-![image-20220228133225462](2022-02-28-Spring5的一些自己总结的有用的东西.assets/image-20220228133225462.png)
+![IOC创建过程](2022-02-28-Spring的IOC有关.assets/IOC创建过程-16460449216161.jpg)
 
 
 
@@ -222,13 +222,15 @@ public void refresh() throws BeansException, IllegalStateException {
 
         // 以上工作都做完之后，我们目前图中 bean工厂 有了， BeanDefinition 也读取进来了，接下来就要完成生产对象的事情辣
         try {
-            // Allows post-processing of the bean factory in context subclasses.
+
+            // 子类覆盖方法做额外的处理，此处我们自己一般不做任何扩展工作，但是可以查看 web 中的代码，是有具体实现的
             postProcessBeanFactory(beanFactory);
 
-            // 调用执行我们的 BeanFactoryPostProcessors 了
+            // 调用执行我们的 BeanFactoryPostProcessors（BeanFactory增强器） 了
             invokeBeanFactoryPostProcessors(beanFactory);
 
             // 注册 BeanPostProcessors aop
+            // 注册 Bean的处理器，这里只是注册功能，正真调用实在 getBean 方法。
             registerBeanPostProcessors(beanFactory);
 
             // 初始化基本的国际化功能，与我们的 bhean 没关系
@@ -237,7 +239,8 @@ public void refresh() throws BeansException, IllegalStateException {
             // 初始化事件多播器，与我们的 bean 没关系
             initApplicationEventMulticaster();
 
-            // Initialize other special beans in specific context subclasses.
+
+            // 留给子类来初始化其它的 Bean
             onRefresh();
 
 		   // 注册监听器，监听多播器，与我们的 bean 没关系
