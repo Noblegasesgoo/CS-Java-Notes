@@ -483,12 +483,6 @@ AOF 有三个写回策略：
 4. **可以主从复制，利用一台从机器进行备份，其它机器正常接收响应**
 5. **RDB 持久化和 AOF 持久化可以同时存在**，他俩通常配合使用
 
-
-
-
-
-
-
 # 参考文章
 
 https://www.pdai.tech/md/db/nosql-redis/db-redis-x-rdb-aof.html
