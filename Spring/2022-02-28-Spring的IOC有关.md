@@ -284,41 +284,41 @@ public void refresh() throws BeansException, IllegalStateException {
 
 ```java
 protected void prepareRefresh() {
-		// Switch to active.
-		this.startupDate = System.currentTimeMillis();
-		this.closed.set(false);
-		this.active.set(true);
+    // Switch to active.
+    this.startupDate = System.currentTimeMillis();
+    this.closed.set(false);
+    this.active.set(true);
 
-		if (logger.isDebugEnabled()) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Refreshing " + this);
-			}
-			else {
-				logger.debug("Refreshing " + getDisplayName());
-			}
-		}
+    if (logger.isDebugEnabled()) {
+        if (logger.isTraceEnabled()) {
+            logger.trace("Refreshing " + this);
+        }
+        else {
+            logger.debug("Refreshing " + getDisplayName());
+        }
+    }
 
-		// Initialize any placeholder property sources in the context environment.
-		initPropertySources();
+    // Initialize any placeholder property sources in the context environment.
+    initPropertySources();
 
-		// Validate that all properties marked as required are resolvable:
-		// see ConfigurablePropertyResolver#setRequiredProperties
-		getEnvironment().validateRequiredProperties();
+    // Validate that all properties marked as required are resolvable:
+    // see ConfigurablePropertyResolver#setRequiredProperties
+    getEnvironment().validateRequiredProperties();
 
-		// Store pre-refresh ApplicationListeners...
-		if (this.earlyApplicationListeners == null) {
-			this.earlyApplicationListeners = new LinkedHashSet<>(this.applicationListeners);
-		}
-		else {
-			// Reset local application listeners to pre-refresh state.
-			this.applicationListeners.clear();
-			this.applicationListeners.addAll(this.earlyApplicationListeners);
-		}
+    // Store pre-refresh ApplicationListeners...
+    if (this.earlyApplicationListeners == null) {
+        this.earlyApplicationListeners = new LinkedHashSet<>(this.applicationListeners);
+    }
+    else {
+        // Reset local application listeners to pre-refresh state.
+        this.applicationListeners.clear();
+        this.applicationListeners.addAll(this.earlyApplicationListeners);
+    }
 
-		// Allow for the collection of early ApplicationEvents,
-		// to be published once the multicaster is available...
-		this.earlyApplicationEvents = new LinkedHashSet<>();
-	}
+    // Allow for the collection of early ApplicationEvents,
+    // to be published once the multicaster is available...
+    this.earlyApplicationEvents = new LinkedHashSet<>();
+}
 ```
 
 
@@ -328,40 +328,40 @@ protected void prepareRefresh() {
 以下内容都是层级关系，
 
 ```java
-	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
-        // 进入该方法查看
-		refreshBeanFactory();
-		return getBeanFactory();
-	}
+protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+    // 进入该方法查看
+    refreshBeanFactory();
+    return getBeanFactory();
+}
 ```
 
 ```java
-	@Override
-	protected final void refreshBeanFactory() throws BeansException {
-        // 首先判断是否有工厂
-		if (hasBeanFactory()) {
-            
-            // 有我摧毁它并且关闭它，双重保险
-			destroyBeans();
-			closeBeanFactory();
-		} try {
-            
-            // 否则创建工厂，这个工厂的名字叫做 DefaultListableBeanFactory
-			DefaultListableBeanFactory beanFactory = createBeanFactory();
-            
-            // 回到最大的那张图，工厂目前已经有了，那么我们接下来就是去读取我们的 bean 的配置了。
-			beanFactory.setSerializationId(getId());
-			customizeBeanFactory(beanFactory);
-            
-            // 加载 bean 的定义信息，beanFactory 中的 beanDefinitionNames 属性装载了所有你配置的 bean 的信息
-            // 类比到图上就是加载 bean 的定义信息
-			loadBeanDefinitions(beanFactory);
-			this.beanFactory = beanFactory;
-		} catch (IOException ex) {
-            
-			throw new ApplicationContextException("I/O error parsing bean definition source for " + getDisplayName(), ex);
-		}
-	}
+@Override
+protected final void refreshBeanFactory() throws BeansException {
+    // 首先判断是否有工厂
+    if (hasBeanFactory()) {
+
+        // 有我摧毁它并且关闭它，双重保险
+        destroyBeans();
+        closeBeanFactory();
+    } try {
+
+        // 否则创建工厂，这个工厂的名字叫做 DefaultListableBeanFactory
+        DefaultListableBeanFactory beanFactory = createBeanFactory();
+
+        // 回到最大的那张图，工厂目前已经有了，那么我们接下来就是去读取我们的 bean 的配置了。
+        beanFactory.setSerializationId(getId());
+        customizeBeanFactory(beanFactory);
+
+        // 加载 bean 的定义信息，beanFactory 中的 beanDefinitionNames 属性装载了所有你配置的 bean 的信息
+        // 类比到图上就是加载 bean 的定义信息
+        loadBeanDefinitions(beanFactory);
+        this.beanFactory = beanFactory;
+    } catch (IOException ex) {
+
+        throw new ApplicationContextException("I/O error parsing bean definition source for " + getDisplayName(), ex);
+    }
+}
 ```
 
 
@@ -374,47 +374,47 @@ protected void prepareRefresh() {
 
 ```java
 protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		// Tell the internal bean factory to use the context's class loader etc.
-		beanFactory.setBeanClassLoader(getClassLoader());
-		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
-		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
+    // Tell the internal bean factory to use the context's class loader etc.
+    beanFactory.setBeanClassLoader(getClassLoader());
+    beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
+    beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
-		// Configure the bean factory with context callbacks.
-		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
-		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
-		beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
-		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
-		beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
-		beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
-		beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+    // Configure the bean factory with context callbacks.
+    beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+    beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
+    beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
+    beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
+    beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
+    beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
+    beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
 
-		// BeanFactory interface not registered as resolvable type in a plain factory.
-		// MessageSource registered (and found for autowiring) as a bean.
-		beanFactory.registerResolvableDependency(BeanFactory.class, beanFactory);
-		beanFactory.registerResolvableDependency(ResourceLoader.class, this);
-		beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
-		beanFactory.registerResolvableDependency(ApplicationContext.class, this);
+    // BeanFactory interface not registered as resolvable type in a plain factory.
+    // MessageSource registered (and found for autowiring) as a bean.
+    beanFactory.registerResolvableDependency(BeanFactory.class, beanFactory);
+    beanFactory.registerResolvableDependency(ResourceLoader.class, this);
+    beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
+    beanFactory.registerResolvableDependency(ApplicationContext.class, this);
 
-		// Register early post-processor for detecting inner beans as ApplicationListeners.
-		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(this));
+    // Register early post-processor for detecting inner beans as ApplicationListeners.
+    beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(this));
 
-		// Detect a LoadTimeWeaver and prepare for weaving, if found.
-		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
-			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
-			// Set a temporary ClassLoader for type matching.
-			beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
-		}
+    // Detect a LoadTimeWeaver and prepare for weaving, if found.
+    if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
+        beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
+        // Set a temporary ClassLoader for type matching.
+        beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
+    }
 
-		// Register default environment beans.
-		if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
-			beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
-		}
-		if (!beanFactory.containsLocalBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
-			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, getEnvironment().getSystemProperties());
-		}
-		if (!beanFactory.containsLocalBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
-			beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, getEnvironment().getSystemEnvironment());
-		}
-	}
+    // Register default environment beans.
+    if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
+        beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
+    }
+    if (!beanFactory.containsLocalBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
+        beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, getEnvironment().getSystemProperties());
+    }
+    if (!beanFactory.containsLocalBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
+        beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, getEnvironment().getSystemEnvironment());
+    }
+}
 ```
 
