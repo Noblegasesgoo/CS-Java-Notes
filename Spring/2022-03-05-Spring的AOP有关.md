@@ -70,6 +70,8 @@
 
 这个责任链模式规定了嵌套执行顺序，我们可以看到是执行完一个 **advice** 再回到链中去获取下一个 **advice**。
 
+执行顺序：around before after(递归1) returning(递归2) throw(递归3）具体方法    然后开始回调 throw returning after
+
 ![image-20220305163908527](2022-03-05-Spring的AOP有关.assets/image-20220305163908527.png)
 
 但是，我们又来了一个问题，我们下节说。
