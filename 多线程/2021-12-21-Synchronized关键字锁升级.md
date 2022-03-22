@@ -16,6 +16,139 @@
 
 
 
+Synchronized 的一些字节码：
+
+```java
+package JUC.lock;
+
+/**
+ * @author noblegasesgoo
+ * @version 0.0.1
+ * @date 2022/3/19 16:25
+ * @description 
+ */
+public class SynchronizedDemo02 {
+
+    public synchronized void test1() {
+
+
+    }
+
+    public static synchronized void test2() {
+
+    }
+
+    public void test3() {
+
+        synchronized (this) {
+
+        }
+    }
+}
+
+```
+
+```shell
+  Last modified 2022-3-19; size 466 bytes
+  MD5 checksum 317393ed9263cac9e25b2f331070e31a
+  Compiled from "SynchronizedDemo02.java"
+public class JUC.lock.SynchronizedDemo02
+  minor version: 0
+  major version: 55
+  flags: ACC_PUBLIC, ACC_SUPER
+Constant pool:
+   #1 = Methodref          #3.#15         // java/lang/Object."<init>":()V
+   #2 = Class              #16            // JUC/lock/SynchronizedDemo02
+   #3 = Class              #17            // java/lang/Object
+   #4 = Utf8               <init>
+   #5 = Utf8               ()V
+   #6 = Utf8               Code
+   #7 = Utf8               LineNumberTable
+   #8 = Utf8               test1
+   #9 = Utf8               test2
+  #10 = Utf8               test3
+  #11 = Utf8               StackMapTable
+  #12 = Class              #18            // java/lang/Throwable
+  #13 = Utf8               SourceFile
+  #14 = Utf8               SynchronizedDemo02.java
+  #15 = NameAndType        #4:#5          // "<init>":()V
+  #16 = Utf8               JUC/lock/SynchronizedDemo02
+  #17 = Utf8               java/lang/Object
+  #18 = Utf8               java/lang/Throwable
+{
+  public JUC.lock.SynchronizedDemo02();
+    descriptor: ()V
+    flags: ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: return
+      LineNumberTable:
+        line 9: 0
+
+  public synchronized void test1();
+    descriptor: ()V
+    flags: ACC_PUBLIC, ACC_SYNCHRONIZED
+    Code:
+      stack=0, locals=1, args_size=1
+         0: return
+      LineNumberTable:
+        line 14: 0
+
+  public static synchronized void test2();
+    descriptor: ()V
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_SYNCHRONIZED
+    Code:
+      stack=0, locals=0, args_size=0
+         0: return
+      LineNumberTable:
+        line 18: 0
+
+  public void test3();
+    descriptor: ()V
+    flags: ACC_PUBLIC
+    Code:
+      stack=2, locals=3, args_size=1
+         0: aload_0
+         1: dup
+         2: astore_1
+         3: monitorenter // 同一时间只能有一个线程持有
+         4: aload_1
+         5: monitorexit // 正常退出
+         6: goto          14
+         9: astore_2
+        10: aload_1
+        11: monitorexit // 异常退出，保证即使发生异常，锁也会正常释放
+        12: aload_2
+        13: athrow
+        14: return
+      Exception table:
+         from    to  target type
+             4     6     9   any
+             9    12     9   any
+      LineNumberTable:
+        line 22: 0
+        line 24: 4
+        line 25: 14
+      StackMapTable: number_of_entries = 2
+        frame_type = 255 /* full_frame */
+          offset_delta = 9
+          locals = [ class JUC/lock/SynchronizedDemo02, class java/lang/Object ]
+          stack = [ class java/lang/Throwable ]
+        frame_type = 250 /* chop */
+          offset_delta = 4
+}
+SourceFile: "SynchronizedDemo02.java"
+
+```
+
+
+
+
+
+
+
 #### 什么是 Synchronized 偏向锁？
 
 是一种锁的状态，拿情况来说明，可能会更好说明这个状态：
@@ -67,6 +200,10 @@ JAVA6和7，偏向锁默认启用， 如果确定程序的锁在通常情况下�
   - 如果还需要持有偏向锁，并且现在其它线程也在争夺，那么情况就升级为轻量级锁。
   - 如果不需要了，那么就将锁对象恢复成无锁状态。
 - 最后唤醒暂停的线程。
+
+#### 偏向锁撤销会带来什么问题？
+
+首先，偏向锁要撤销，是得到全局安全点，首先就导致了性能下降，如果你的系统，有很多线程来竞争，那么这个时候推荐禁用偏向锁，不然抢锁和释放锁的过程会很影响性能。
 
 #### 那么什么是 safepoint 呢？介绍一下呗
 
@@ -239,4 +376,3 @@ CAS 操作失败之后，当前线程会检查为什么失败：
 
 - 如果 CAS 失败的话，就说明有其他线程正在膨胀，或者已经膨胀结束了，那么当前线程再次自旋获取就可以了。
 - 如果 CAS 成功了的话，那么当前这个线程就是持锁线程了，那么当前线程需要给这个锁升级状态，主要是将管程对象 **`ObjectMonitor`** 的 **`owner`** 字段设置为原轻量级锁持有线程，再将持锁线程的第一条记录内存储的 **`displacedMarkword`** 保存到管程对象内，可能降级的时候可能会用到，然后把栈顶 **`markword`** 拷贝到重量级锁之后，再下一步就是设置锁对象 **`markword`** 为重量级锁，包括两个信息：一个是重量级锁对象的内存地址，一个是重量级锁的状态，再之后其它线程去请求这把锁，都可以找到这个重量级锁对象，走管程内的逻辑了。
-
