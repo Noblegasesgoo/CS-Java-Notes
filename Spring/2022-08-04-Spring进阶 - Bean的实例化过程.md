@@ -350,3 +350,11 @@ Spring解决循环依赖主要是依赖三级缓存，但是的**在调用构造
 - **构造器循环依赖：**
 
 这类循环依赖问题可以通过使用@Lazy注解解决。
+
+## 参考文章
+
+https://juejin.cn/post/6844903843596107790
+
+https://www.zhihu.com/question/438247718/answer/1730527725
+
+https://www.pdai.tech/md/spring/spring-x-framework-ioc-source-3.html
